@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Express Chat</title>
+</head>
+<body>
+  <div id="history">
+    Loading...
+  </div>
+
+  <form>
+    <input name="name" placeholder="Name">
+    <input name="message" placeholder="Message">
+    <input type="submit">
+  </form>
+
+  <script>
+    const form = document.querySelector('form');
+    const chat = document.querySelector('#history');
+
+    const serverURL = 'http://localhost:8080';
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const name = form.name.value;
+      const message = form.message.value;
+      sendMessage(name, message);
+    });
+
+    async function sendMessage(name, message) {
+      const response = await fetch(`
+        ${serverURL}/create-message?name=${name}&message=${message}
+      `);
+      const messeges = await response.json();
+      renderMesseges(messeges);
+      form.message.value = '';
+    }
+
+    async function readMesseges() {
+      const response = await fetch(`${serverURL}/read-messeges`);
+      const messeges = await response.json();
+      renderMesseges(messeges);
+    }
+
+    function renderMesseges(messeges) {
+      chat.innerHTML = messeges.reduce((html, {name, message}) => {
+        html += `
+          <div class="message">
+            <span class="message-author">${name}: </span>
+            <span class="message-text">${message}</span>
+          </div>
+        `;
+        return html;
+      }, '');
+    }
+
+    readMesseges();
+  </script>
+</body>
+</html>
