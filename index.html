@@ -14,11 +14,13 @@
     <input name="name" placeholder="Name">
     <input name="message" placeholder="Message">
     <input type="submit">
+    <input type="button" id="deleteHistoryButton" value="Clear">
   </form>
 
   <script>
     const form = document.querySelector('form');
     const chat = document.querySelector('#history');
+    const deleteHistoryButton = document.querySelector('#deleteHistoryButton');
 
     const serverURL = 'http://localhost:8080';
 
@@ -29,17 +31,37 @@
       sendMessage(name, message);
     });
 
+    deleteHistoryButton.addEventListener('click', e => {
+      e.preventDefault();
+      deleteHistory();
+    });
+
     async function sendMessage(name, message) {
-      const response = await fetch(`
-        ${serverURL}/create-message?name=${name}&message=${message}
-      `);
+      const response = await fetch(`${serverURL}/messeges`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          message,
+        }),
+      });
       const messeges = await response.json();
       renderMesseges(messeges);
       form.message.value = '';
     }
 
     async function readMesseges() {
-      const response = await fetch(`${serverURL}/read-messeges`);
+      const response = await fetch(`${serverURL}/messeges`);
+      const messeges = await response.json();
+      renderMesseges(messeges);
+    }
+
+    async function deleteHistory() {
+      const response = await fetch(`${serverURL}/messeges`, {
+        method: 'DELETE',
+      });
       const messeges = await response.json();
       renderMesseges(messeges);
     }
